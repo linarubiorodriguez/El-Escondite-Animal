@@ -1,20 +1,20 @@
-from flask import Flask
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
+from flaskr import create_app
+from .modelos import db
+from flask_restful import Api
+from .vistas import VistaSignIn, VistaLogIn
+from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
-app = Flask(__name__)
+app = create_app('default')
+app_context = app.app_context()
+app_context.push()
+CORS(app)
+db.init_app(app)
+db.create_all()
 
-USER_DB = 'root'
-PASS_DB = ''
-URL_DB = 'localhost'
-NAME_DB = 'bdesa'
-FULL_URL_DB = f'mysql+pymysql://{USER_DB}:{PASS_DB}@{URL_DB}/{NAME_DB}'
+api = Api(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = FULL_URL_DB
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+api.add_resource(VistaLogIn, '/login')  
+api.add_resource(VistaSignIn, '/signin') 
 
-db = SQLAlchemy(app)
-
-from modelos.modelos import *  
-
-migrate = Migrate(app, db)
+jwt = JWTManager(app)
